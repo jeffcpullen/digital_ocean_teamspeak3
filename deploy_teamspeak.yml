@@ -1,0 +1,54 @@
+---
+- hosts: teamspeak
+  remote_user: root
+  tasks:
+
+
+  - name: Update to the latest packages
+    dnf:
+      name: '*'
+      state: latest
+
+#  - name: Add needed packages
+#    dnf:
+#      name: "{{item}}"
+#      state: latest
+#    with_items:
+#      - "wget"
+
+  - name: Download TS3
+    get_url:
+      url: http://dl.4players.de/ts/releases/3.0.12.2/teamspeak3-server_linux_amd64-3.0.12.2.tar.bz2
+      dest: /tmp/
+      mode: 0666
+
+  - name: Add TS3 User
+    user:
+      name: teamspeak
+      state: present
+      home: /home/teamspeak
+      createhome: yes
+
+  - name: Extract TS3
+    unarchive:
+      src: /tmp/teamspeak3-server_linux_amd64-3.0.12.2.tar.bz2
+      dest: /home/teamspeak/
+      copy: no
+    become: yes
+    become_user: teamspeak
+
+#  - name: Launch the TS3 setup script
+#    command: ./ts3server_minimal_runscript.sh >> /home/teamspeak/teamspeak3-server_linux_amd64/setup.log 2>&1 &
+#    args:
+#      chdir: /home/teamspeak/teamspeak3-server_linux_amd64
+#      creates: /home/teamspeak/teamspeak3-server_linux_amd64/setup.log
+#    become:
+#    become_user: teamspeak 
+
+  - name: Launch the TS3 setup script
+    command: ./ts3server_startscript.sh start >> /home/teamspeak/teamspeak3-server_linux_amd64/start.log 2>&1 &
+    args:
+      chdir: /home/teamspeak/teamspeak3-server_linux_amd64
+      creates: /home/teamspeak/teamspeak3-server_linux_amd64/start.log
+    become: yes
+    become_user: teamspeak
